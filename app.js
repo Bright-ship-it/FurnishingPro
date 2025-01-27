@@ -1,5 +1,3 @@
-// Balanced Football Team Generator with Captains
-
 // HTML Structure
 const appHTML = `
   <div class="p-4 max-w-xl mx-auto">
@@ -112,36 +110,23 @@ function updatePlayerList() {
 }
 
 function generateBalancedTeams(players) {
-  // Shuffle players
-  const shuffledPlayers = [...players].sort(() => Math.random() - 0.5);
+  const defenders = players.filter((p) => p.position === "defender");
+  const midfielders = players.filter((p) => p.position === "midfielder");
+  const forwards = players.filter((p) => p.position === "forward");
 
-  // Divide into two teams
-  const half = Math.ceil(shuffledPlayers.length / 2);
-  const team1 = shuffledPlayers.slice(0, half);
-  const team2 = shuffledPlayers.slice(half);
+  const team1 = [];
+  const team2 = [];
 
-  // Ensure captains are on different teams
-  if (
-    team1.some((p) => p.name === data.captains.team2) &&
-    team2.some((p) => p.name === data.captains.team1)
-  ) {
-    return { team1, team2 };
+  function splitPlayersByPosition(positionGroup) {
+    const shuffled = [...positionGroup].sort(() => Math.random() - 0.5);
+    const half = Math.ceil(shuffled.length / 2);
+    team1.push(...shuffled.slice(0, half));
+    team2.push(...shuffled.slice(half));
   }
 
-  // Adjust teams if captains are on the same team
-  if (team1.some((p) => p.name === data.captains.team2)) {
-    const captain2Player = team1.find((p) => p.name === data.captains.team2);
-    const swapPlayer = team2[0];
-    team2[0] = captain2Player;
-    team1.splice(team1.indexOf(captain2Player), 1, swapPlayer);
-  }
-
-  if (team2.some((p) => p.name === data.captains.team1)) {
-    const captain1Player = team2.find((p) => p.name === data.captains.team1);
-    const swapPlayer = team1[0];
-    team1[0] = captain1Player;
-    team2.splice(team2.indexOf(captain1Player), 1, swapPlayer);
-  }
+  splitPlayersByPosition(defenders);
+  splitPlayersByPosition(midfielders);
+  splitPlayersByPosition(forwards);
 
   return { team1, team2 };
 }
