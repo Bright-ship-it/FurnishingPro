@@ -3,7 +3,7 @@
 // HTML Structure
 const appHTML = `
   <div class="p-4 max-w-xl mx-auto">
-    <h1 class="text-2xl font-bold mb-4">Tuesday Night Football - Team Generator</h1>
+    <h1 class="text-2xl font-bold mb-4">Tuesday Night Football - Teams Generator!</h1>
 
     <div class="mb-4">
       <h2 class="text-lg font-semibold">Add Players</h2>
@@ -17,18 +17,18 @@ const appHTML = `
     </div>
 
     <div class="mb-4">
-      <h2 class="text-lg font-semibold">Set Captains</h2>
+      <h2 class="text-lg font-semibold">Captains</h2>
       <input id="captain1" type="text" placeholder="Captain - Team Black" class="border rounded p-2 mr-2 w-1/2" />
       <input id="captain2" type="text" placeholder="Captain - Team White" class="border rounded p-2 w-1/2" />
     </div>
 
     <div class="mb-4">
-      <h2 class="text-lg font-semibold">Player List</h2>
+      <h2 class="text-lg font-semibold">Player List - Paying members ONLY!</h2>
       <ul id="playerList" class="border rounded p-4"></ul>
     </div>
 
     <div class="mb-4">
-      <button id="generateTeamsBtn" class="bg-green-500 text-white p-2 rounded">Generate Balanced Teams</button>
+      <button id="generateTeamsBtn" class="bg-green-500 text-white p-2 rounded">VAMOS!</button>
     </div>
 
     <div id="teamsOutput" class="mt-4"></div>
