@@ -3,7 +3,7 @@
 // HTML Structure
 const appHTML = `
   <div class="p-4 max-w-xl mx-auto">
-    <h1 class="text-2xl font-bold mb-4">Balanced Football Team Generator</h1>
+    <h1 class="text-2xl font-bold mb-4">Tuesday Night Football - Team Generator</h1>
 
     <div class="mb-4">
       <h2 class="text-lg font-semibold">Add Players</h2>
@@ -18,8 +18,8 @@ const appHTML = `
 
     <div class="mb-4">
       <h2 class="text-lg font-semibold">Set Captains</h2>
-      <input id="captain1" type="text" placeholder="Team 1 Captain" class="border rounded p-2 mr-2 w-1/2" />
-      <input id="captain2" type="text" placeholder="Team 2 Captain" class="border rounded p-2 w-1/2" />
+      <input id="captain1" type="text" placeholder="Captain - Team Black" class="border rounded p-2 mr-2 w-1/2" />
+      <input id="captain2" type="text" placeholder="Captain - Team White" class="border rounded p-2 w-1/2" />
     </div>
 
     <div class="mb-4">
@@ -151,7 +151,7 @@ function displayTeams(team1, team2) {
 
   outputEl.innerHTML = `
     <div class="border rounded p-4 mb-4">
-      <h2 class="text-lg font-semibold">Team 1</h2>
+      <h2 class="text-lg font-semibold">Team Black</h2>
       <p class="font-bold">Captain: ${data.captains.team1}</p>
       <ul class="list-disc ml-4">
         ${team1.map((p) => `<li>${p.name} (${p.position})</li>`).join("")}
@@ -159,7 +159,7 @@ function displayTeams(team1, team2) {
     </div>
 
     <div class="border rounded p-4">
-      <h2 class="text-lg font-semibold">Team 2</h2>
+      <h2 class="text-lg font-semibold">Team White</h2>
       <p class="font-bold">Captain: ${data.captains.team2}</p>
       <ul class="list-disc ml-4">
         ${team2.map((p) => `<li>${p.name} (${p.position})</li>`).join("")}
