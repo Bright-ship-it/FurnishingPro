@@ -1,176 +1,181 @@
-const cartContainer = document.querySelector('.cart-container');
-const productList = document.querySelector('.product-list');
-const cartList = document.querySelector('.cart-list');
-const cartTotalValue = document.getElementById('cart-total-value');
-const cartCountInfo = document.getElementById('cart-count-info');
-let cartItemID = 1;
+// Balanced Football Team Generator with Captains
 
-eventListeners();
+// HTML Structure
+const appHTML = `
+  <div class="p-4 max-w-xl mx-auto">
+    <h1 class="text-2xl font-bold mb-4">Balanced Football Team Generator</h1>
 
-// all event listeners
-function eventListeners(){
-    window.addEventListener('DOMContentLoaded', () => {
-        loadJSON();
-        loadCart();
+    <div class="mb-4">
+      <h2 class="text-lg font-semibold">Add Players</h2>
+      <input id="playerName" type="text" placeholder="Player Name" class="border rounded p-2 mr-2 w-1/2" />
+      <select id="playerPosition" class="border rounded p-2">
+        <option value="defender">Defender</option>
+        <option value="midfielder">Midfielder</option>
+        <option value="forward">Forward</option>
+      </select>
+      <button id="addPlayerBtn" class="bg-blue-500 text-white p-2 rounded ml-2">Add Player</button>
+    </div>
+
+    <div class="mb-4">
+      <h2 class="text-lg font-semibold">Set Captains</h2>
+      <input id="captain1" type="text" placeholder="Team 1 Captain" class="border rounded p-2 mr-2 w-1/2" />
+      <input id="captain2" type="text" placeholder="Team 2 Captain" class="border rounded p-2 w-1/2" />
+    </div>
+
+    <div class="mb-4">
+      <h2 class="text-lg font-semibold">Player List</h2>
+      <ul id="playerList" class="border rounded p-4"></ul>
+    </div>
+
+    <div class="mb-4">
+      <button id="generateTeamsBtn" class="bg-green-500 text-white p-2 rounded">Generate Balanced Teams</button>
+    </div>
+
+    <div id="teamsOutput" class="mt-4"></div>
+  </div>
+`;
+
+document.body.innerHTML = appHTML;
+
+data = {
+  players: [],
+  captains: { team1: null, team2: null },
+  gameWeek: 1,
+};
+
+// Event Listeners
+document.getElementById("addPlayerBtn").addEventListener("click", () => {
+  const name = document.getElementById("playerName").value.trim();
+  const position = document.getElementById("playerPosition").value;
+
+  if (!name) {
+    alert("Please enter a player name.");
+    return;
+  }
+
+  // Add player to list
+  data.players.push({ name, position });
+  updatePlayerList();
+
+  // Clear inputs
+  document.getElementById("playerName").value = "";
+  document.getElementById("playerPosition").value = "defender";
+});
+
+document.getElementById("generateTeamsBtn").addEventListener("click", () => {
+  const captain1 = document.getElementById("captain1").value.trim();
+  const captain2 = document.getElementById("captain2").value.trim();
+
+  if (!captain1 || !captain2) {
+    alert("Please set captains for both teams.");
+    return;
+  }
+
+  if (captain1 === captain2) {
+    alert("Captains cannot be the same person. Please set different captains.");
+    return;
+  }
+
+  data.captains.team1 = captain1;
+  data.captains.team2 = captain2;
+
+  if (data.players.length < 2) {
+    alert("Not enough players to generate teams.");
+    return;
+  }
+
+  const teams = generateBalancedTeams(data.players);
+  displayTeams(teams.team1, teams.team2);
+});
+
+// Functions
+function updatePlayerList() {
+  const listEl = document.getElementById("playerList");
+  listEl.innerHTML = "";
+
+  data.players.forEach((player, index) => {
+    const li = document.createElement("li");
+    li.textContent = `${player.name} (${player.position})`;
+    li.className = "flex justify-between items-center py-1";
+
+    const removeBtn = document.createElement("button");
+    removeBtn.textContent = "Remove";
+    removeBtn.className = "text-red-500 text-sm";
+    removeBtn.addEventListener("click", () => {
+      data.players.splice(index, 1);
+      updatePlayerList();
     });
-    // toggle navbar when toggle button is clicked
-    document.querySelector('.navbar-toggler').addEventListener('click', () => {
-        document.querySelector('.navbar-collapse').classList.toggle('show-navbar');
-    });
 
-    // show/hide cart container
-    document.getElementById('cart-btn').addEventListener('click', () => {
-        cartContainer.classList.toggle('show-cart-container');
-    });
-
-    // add to cart
-    productList.addEventListener('click', purchaseProduct);
-
-    // delete from cart
-    cartList.addEventListener('click', deleteProduct);
+    li.appendChild(removeBtn);
+    listEl.appendChild(li);
+  });
 }
 
-// update cart info
-function updateCartInfo(){
-    let cartInfo = findCartInfo();
-    cartCountInfo.textContent = cartInfo.productCount;
-    cartTotalValue.textContent = cartInfo.total;
+function generateBalancedTeams(players) {
+  // Shuffle players
+  const shuffledPlayers = [...players].sort(() => Math.random() - 0.5);
+
+  // Divide into two teams
+  const half = Math.ceil(shuffledPlayers.length / 2);
+  const team1 = shuffledPlayers.slice(0, half);
+  const team2 = shuffledPlayers.slice(half);
+
+  // Ensure captains are on different teams
+  if (
+    team1.some((p) => p.name === data.captains.team2) &&
+    team2.some((p) => p.name === data.captains.team1)
+  ) {
+    return { team1, team2 };
+  }
+
+  // Adjust teams if captains are on the same team
+  if (team1.some((p) => p.name === data.captains.team2)) {
+    const captain2Player = team1.find((p) => p.name === data.captains.team2);
+    const swapPlayer = team2[0];
+    team2[0] = captain2Player;
+    team1.splice(team1.indexOf(captain2Player), 1, swapPlayer);
+  }
+
+  if (team2.some((p) => p.name === data.captains.team1)) {
+    const captain1Player = team2.find((p) => p.name === data.captains.team1);
+    const swapPlayer = team1[0];
+    team1[0] = captain1Player;
+    team2.splice(team2.indexOf(captain1Player), 1, swapPlayer);
+  }
+
+  return { team1, team2 };
 }
 
-// load product items content form JSON file
-function loadJSON(){
-    fetch('db.json')
-    .then(response => response.json())
-    .then(data =>{
-        let html = '';
-        data.forEach(product => {
-            html += `
-                <div class = "product-item">
-                    <div class = "product-img">
-                        <img src = "${product.imgSrc}" alt = "product image">
-                        <button type = "button" class = "add-to-cart-btn">
-                            <i class = "fas fa-shopping-cart"></i>Add To Cart
-                        </button>
-                    </div>
+function displayTeams(team1, team2) {
+  const outputEl = document.getElementById("teamsOutput");
 
-                    <div class = "product-content">
-                        <h3 class = "product-name">${product.name}</h3>
-                        <span class = "product-category">${product.category}</span>
-                        <p class = "product-price"> ${product.price}</p>
-                    </div>
-                </div>
-            `;
-        });
-        productList.innerHTML = html;
-    })
-    .catch(error => {
-        alert(`User live server or local server`);
-        //URL scheme must be "http" or "https" for CORS request. You need to be serving your index.html locally or have your site hosted on a live server somewhere for the Fetch API to work properly.
-    })
+  outputEl.innerHTML = `
+    <div class="border rounded p-4 mb-4">
+      <h2 class="text-lg font-semibold">Team 1</h2>
+      <p class="font-bold">Captain: ${data.captains.team1}</p>
+      <ul class="list-disc ml-4">
+        ${team1.map((p) => `<li>${p.name} (${p.position})</li>`).join("")}
+      </ul>
+    </div>
+
+    <div class="border rounded p-4">
+      <h2 class="text-lg font-semibold">Team 2</h2>
+      <p class="font-bold">Captain: ${data.captains.team2}</p>
+      <ul class="list-disc ml-4">
+        ${team2.map((p) => `<li>${p.name} (${p.position})</li>`).join("")}
+      </ul>
+    </div>
+  `;
+
+  rotateCaptains();
 }
 
-
-// purchase product
-function purchaseProduct(e){
-    if(e.target.classList.contains('add-to-cart-btn')){
-        let product = e.target.parentElement.parentElement;
-        getProductInfo(product);
-    }
-}
-
-// get product info after add to cart button click
-function getProductInfo(product){
-    let productInfo = {
-        id: cartItemID,
-        imgSrc: product.querySelector('.product-img img').src,
-        name: product.querySelector('.product-name').textContent,
-        category: product.querySelector('.product-category').textContent,
-        price: product.querySelector('.product-price').textContent
-    }
-    cartItemID++;
-    addToCartList(productInfo);
-    saveProductInStorage(productInfo);
-}
-
-// add the selected product to the cart list
-function addToCartList(product){
-    const cartItem = document.createElement('div');
-    cartItem.classList.add('cart-item');
-    cartItem.setAttribute('data-id', `${product.id}`);
-    cartItem.innerHTML = `
-        <img src = "${product.imgSrc}" alt = "product image">
-        <div class = "cart-item-info">
-            <h3 class = "cart-item-name">${product.name}</h3>
-            <span class = "cart-item-category">${product.category}</span>
-            <span class = "cart-item-price">${product.price}</span>
-        </div>
-
-        <button type = "button" class = "cart-item-del-btn">
-            <i class = "fas fa-times"></i>
-        </button>
-    `;
-    cartList.appendChild(cartItem);
-}
-
-// save the product in the local storage
-function saveProductInStorage(item){
-    let products = getProductFromStorage();
-    products.push(item);
-    localStorage.setItem('products', JSON.stringify(products));
-    updateCartInfo();
-}
-
-// get all the products info if there is any in the local storage
-function getProductFromStorage(){
-    return localStorage.getItem('products') ? JSON.parse(localStorage.getItem('products')) : [];
-    // returns empty array if there isn't any product info
-}
-
-// load carts product
-function loadCart(){
-    let products = getProductFromStorage();
-    if(products.length < 1){
-        cartItemID = 1; // if there is no any product in the local storage
-    } else {
-        cartItemID = products[products.length - 1].id;
-        cartItemID++;
-        // else get the id of the last product and increase it by 1
-    }
-    products.forEach(product => addToCartList(product));
-
-    // calculate and update UI of cart info 
-    updateCartInfo();
-}
-
-// calculate total price of the cart and other info
-function findCartInfo(){
-    let products = getProductFromStorage();
-    let total = products.reduce((acc, product) => {
-        let price = parseFloat(product.price.substr(1)); // removing currency sign
-        return acc += price;
-    }, 0); // adding all the prices
-
-    return{
-        total: total.toFixed(2),
-        productCount: products.length
-    }
-}
-
-// delete product from cart list and local storage
-function deleteProduct(e){
-    let cartItem;
-    if(e.target.tagName === "BUTTON"){
-        cartItem = e.target.parentElement;
-        cartItem.remove(); // this removes from the DOM only
-    } else if(e.target.tagName === "I"){
-        cartItem = e.target.parentElement.parentElement;
-        cartItem.remove(); // this removes from the DOM only
-    }
-
-    let products = getProductFromStorage();
-    let updatedProducts = products.filter(product => {
-        return product.id !== parseInt(cartItem.dataset.id);
-    });
-    localStorage.setItem('products', JSON.stringify(updatedProducts)); // updating the product list after the deletion
-    updateCartInfo();
+function rotateCaptains() {
+  if (data.gameWeek % 3 === 0) {
+    alert("Game Week 3 reached! Rotating captains...");
+    const temp = data.captains.team1;
+    data.captains.team1 = data.captains.team2;
+    data.captains.team2 = temp;
+  }
+  data.gameWeek++;
 }
